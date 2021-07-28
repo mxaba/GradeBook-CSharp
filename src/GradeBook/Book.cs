@@ -15,48 +15,62 @@ namespace GradeBook {
             set;
         }
     }
+
+    public interface IBook {
+        void AddGrade(double grade);
+        Statistics GetStatistics();
+        string Name { get; }
+        event GradeAddedDelegate GradeAdded;
+    }
+
+    public abstract class Book : NameObject {
+        public Book(string name) : base(name){
+        }
+
+        public abstract void AddGrade(double grade);
+    }
     
-    public class Book : NameObject {
+    public class InMemoryBook : Book {
         
         private List<double> grades;
 
         public const string CATEGORY = "Science";
 
-        public event GradeAddedDelegate gradeAdded;
+        public event GradeAddedDelegate GradeAdded;
 
 
-        public Book(string name) : base(name) {
+        public InMemoryBook(string name) : base(name) {
             grades = new List<double>();
             Name = name;
         }
 
-        public void addGrade(char letter) {
+        public void AddGrade(char letter) {
             switch(letter) {
                 case 'A':
-                    addGrade(90);
+                    AddGrade(90);
                     break;
                 case 'B':
-                    addGrade(80);
+                    AddGrade(80);
                     break;
                 case 'C':
-                    addGrade(70);
+                    AddGrade(70);
                     break;
                 case 'D':
-                    addGrade(60);
+                    AddGrade(60);
                     break;
                 case 'F':
-                    addGrade(50);
+                    AddGrade(50);
                     break;
                 default:
-                    addGrade(0);
+                    AddGrade(0);
                     break;
             }
         }
-        public void addGrade(double grade){
+        public override void AddGrade(double grade){
             if(grade <= 100 && grade >= 0){
                 grades.Add(grade);
-                if (gradeAdded != null){
-                    gradeAdded(this, new EventArgs());
+                if (GradeAdded != null){
+                    GradeAdded(this, new EventArgs());
                 }
             } else {
                 throw new ArgumentException($"Invalid {nameof(grade)}");
