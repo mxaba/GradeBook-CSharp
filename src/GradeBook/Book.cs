@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 namespace GradeBook {
@@ -23,11 +24,34 @@ namespace GradeBook {
         event GradeAddedDelegate GradeAdded;
     }
 
-    public abstract class Book : NameObject {
+    public abstract class Book : NameObject, IBook {
         public Book(string name) : base(name){
         }
-
+        public abstract event GradeAddedDelegate GradeAdded;
         public abstract void AddGrade(double grade);
+        public abstract Statistics GetStatistics();
+    }
+
+    public class DiskBook : Book {
+        public DiskBook(string name) : base(name){
+        }
+
+        public override event GradeAddedDelegate GradeAdded;
+
+        public override void AddGrade(double grade)
+        {
+            using (var writer = File.AppendText($"{Name}")){   
+                writer.WriteLine(grade);
+                if (GradeAdded != null) {
+                    GradeAdded(this, new EventArgs());
+                }
+            }
+        }
+
+        public override Statistics GetStatistics()
+        {
+            throw new NotImplementedException();
+        }
     }
     
     public class InMemoryBook : Book {
@@ -36,7 +60,7 @@ namespace GradeBook {
 
         public const string CATEGORY = "Science";
 
-        public event GradeAddedDelegate GradeAdded;
+        public override event GradeAddedDelegate GradeAdded;
 
 
         public InMemoryBook(string name) : base(name) {
@@ -77,7 +101,7 @@ namespace GradeBook {
             }
         }
 
-        public Statistics GetStatistics() {
+        public override Statistics GetStatistics() {
             var result = new Statistics();
             
             result.Average = 0.00;
