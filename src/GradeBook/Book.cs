@@ -40,7 +40,7 @@ namespace GradeBook {
 
         public override void AddGrade(double grade)
         {
-            using (var writer = File.AppendText($"{Name}")){   
+            using (var writer = File.AppendText($"{Name}.txt")){   
                 writer.WriteLine(grade);
                 if (GradeAdded != null) {
                     GradeAdded(this, new EventArgs());
@@ -48,9 +48,21 @@ namespace GradeBook {
             }
         }
 
-        public override Statistics GetStatistics()
-        {
-            throw new NotImplementedException();
+        public override Statistics GetStatistics() {
+            var results = new Statistics();
+
+            using(var reader = File.OpenText($"{Name}.txt")) {
+                var line = reader.ReadLine();
+                
+                while (line != null){
+                    var number = double.Parse(line);
+                    results.Add(number);
+
+                    line = reader.ReadLine();
+                }
+            }
+
+            return results;
         }
     }
     
@@ -104,38 +116,9 @@ namespace GradeBook {
         public override Statistics GetStatistics() {
             var result = new Statistics();
             
-            result.Average = 0.00;
-            result.High = double.MinValue;
-            result.Low = double.MaxValue;
-
             for(var index = 0; index < grades.Count; index++) {
-                result.High = Math.Max(grades[index], result.High);
-                result.Low = Math.Min(grades[index], result.Low);
-                result.Average += grades[index];
-            }
-
-            switch (result.Average) {
-                case var d when d >= 90.00:
-                    result.Letter = 'A';
-                    break;
-                case var d when d >= 80.00:
-                    result.Letter = 'B';
-                    break;
-                case var d when d >= 70.00:
-                    result.Letter = 'C';
-                    break;
-                case var d when d >= 60.00:
-                    result.Letter = 'D';
-                    break;
-                case var d when d >= 50.00:
-                    result.Letter = 'F';
-                    break;
-                default:
-                    result.Letter = 'H';
-                    break;
-            }
-
-            result.Average /= grades.Count;
+                result.Add(grades[index]);
+            }            
             
             return result;
         }
