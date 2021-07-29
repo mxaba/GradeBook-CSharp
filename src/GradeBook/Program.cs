@@ -6,7 +6,7 @@ namespace GradeBook {
         static void Main(string[] args)
         {
 
-            IBook book = new DiskBook("Mcebo's Grade-Book");
+            IBook book = new DiskBook(args[0]);
             book.GradeAdded += OnGradeAdded;
             EnteredGrades(book);
 
